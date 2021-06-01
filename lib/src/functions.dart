@@ -12,7 +12,7 @@ import 'package:path/path.dart' as path;
 
 final _sep = path.separator;
 
-List<File> findTestFiles(Directory packageRoot, {Glob excludeGlob}) {
+List<File> findTestFiles(Directory packageRoot, {Glob? excludeGlob}) {
   final testsPath = path.join(packageRoot.absolute.path, 'test');
   final testsRoot = Directory(testsPath);
   final contents = testsRoot.listSync(recursive: true);
@@ -139,7 +139,7 @@ Future<void> runTestsAndCollect(String packageRoot, String port,
 }
 
 // copied from `coverage` package
-Uri _extractObservatoryUri(String str) {
+Uri? _extractObservatoryUri(String str) {
   const kObservatoryListening = 'Observatory listening on ';
   final msgPos = str.indexOf(kObservatoryListening);
   if (msgPos == -1) return null;
@@ -157,7 +157,7 @@ double calculateLineCoverage(File lcovReport) {
   var totalLines = 0;
   var hitLines = 0;
   for (final rec in report.records) {
-    for (final line in rec.lines.data) {
+    for (final line in rec.lines?.data ?? []) {
       totalLines++;
       hitLines += (line.executionCount > 0) ? 1 : 0;
     }
@@ -187,7 +187,7 @@ class _BadgeMetrics {
   final int rightX;
   final int rightLength;
 
-  _BadgeMetrics({this.width, this.rightX, this.rightLength});
+  _BadgeMetrics({required this.width, required this.rightX, required this.rightLength});
 
   factory _BadgeMetrics.forPercentage(double value) {
     final pct = (value * 100).floor();
@@ -213,7 +213,7 @@ class _BadgeMetrics {
   }
 }
 
-String _color(double percentage) {
+String? _color(double percentage) {
   final map = {
     0.0: _Color(0xE0, 0x5D, 0x44),
     0.5: _Color(0xE0, 0x5D, 0x44),
@@ -221,8 +221,8 @@ String _color(double percentage) {
     0.9: _Color(0x97, 0xCA, 0x00),
     1.0: _Color(0x44, 0xCC, 0x11),
   };
-  double lower;
-  double upper;
+  late double lower;
+  late double? upper;
   for (final key in map.keys) {
     if (percentage < key) {
       upper = key;
@@ -233,6 +233,7 @@ String _color(double percentage) {
   upper ??= 1.0;
   final lowerColor = map[lower];
   final upperColor = map[upper];
+  if (lowerColor == null || upperColor == null) return null;
   final range = upper - lower;
   final rangePct = (percentage - lower) / range;
   final pctLower = 1 - rangePct;

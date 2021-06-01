@@ -45,7 +45,7 @@ Future main(List<String> arguments) async {
     return;
   }
 
-  Glob excludeGlob;
+  late Glob excludeGlob;
   if (options['exclude'] is String) {
     excludeGlob = Glob(options['exclude']);
   }
